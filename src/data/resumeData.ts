@@ -4,8 +4,8 @@ export const resumeData = {
         title: "Tech Lead",
         phone: "REDACTED",
         email: "freddysend@gmail.com",
-        github: "GitHub", // URL to be filled if known, typical pattern
-        linkedin: "LinkedIn",
+        github: "https://github.com/",
+        linkedin: "https://www.linkedin.com/",
         address: "Kerala, India",
         languages: ["English", "Malayalam"],
         dob: "REDACTED"

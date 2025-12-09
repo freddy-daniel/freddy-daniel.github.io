@@ -2,19 +2,15 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Whiteboard } from './Whiteboard';
 import { ProductDesigner } from './ProductDesigner';
-import { VirtualList } from './VirtualList';
 import { Charts } from './Charts';
-import { WebRTC } from './WebRTC';
-import { FaPen, FaVideo, FaTshirt, FaList, FaChartBar } from 'react-icons/fa';
+import { FaPen, FaTshirt, FaChartBar } from 'react-icons/fa';
 
 export const Demos = () => {
     const [activeTab, setActiveTab] = useState('whiteboard');
 
     const tabs = [
         { id: 'whiteboard', label: 'Whiteboard', icon: <FaPen />, component: <Whiteboard /> },
-        { id: 'webrtc', label: 'WebRTC Call', icon: <FaVideo />, component: <WebRTC /> },
         { id: 'product', label: 'Product Designer', icon: <FaTshirt />, component: <ProductDesigner /> },
-        { id: 'virtual', label: 'Virtual List', icon: <FaList />, component: <VirtualList /> },
         { id: 'charts', label: 'Analytics', icon: <FaChartBar />, component: <Charts /> },
     ];
 

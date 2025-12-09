@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { HiMenu, HiX } from 'react-icons/hi';
+import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import { resumeData } from '../../data/resumeData';
 
 export const Header = () => {
@@ -44,7 +45,15 @@ export const Header = () => {
                                 </NavLink>
                             ))}
                         </nav>
-                        <ThemeToggle />
+                        <div className="flex items-center space-x-4">
+                            <a href={resumeData.personalInfo.github} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">
+                                <FaGithub className="w-5 h-5" />
+                            </a>
+                            <a href={resumeData.personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">
+                                <FaLinkedin className="w-5 h-5" />
+                            </a>
+                            <ThemeToggle />
+                        </div>
                     </div>
 
                     {/* Mobile menu button */}

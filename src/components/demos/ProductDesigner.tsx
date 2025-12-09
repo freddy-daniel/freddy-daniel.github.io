@@ -16,6 +16,25 @@ export const ProductDesigner = () => {
             });
             setCanvas(newCanvas);
 
+            // T-Shirt SVG Path (Simple Manual Construction)
+            // M150,50 Q300,120 450,50 (Neck) -> Sleeves -> Body
+            const tshirtPathData = 'M150,50 Q300,120 450,50 L550,150 L500,250 L450,200 L450,550 L150,550 L150,200 L100,250 L50,150 Z';
+
+            const shirtGroup = new fabric.Path(tshirtPathData, {
+                fill: '#f3f4f6',
+                stroke: '#e5e7eb',
+                strokeWidth: 5,
+                selectable: false,
+                evented: false,
+                scaleX: 0.7,
+                scaleY: 0.7,
+                originX: 'center',
+                originY: 'center',
+            });
+
+            newCanvas.add(shirtGroup);
+            newCanvas.renderAll();
+
             // Handle resizing
             const handleResize = () => {
                 const parent = canvasRef.current?.parentElement;
@@ -24,6 +43,14 @@ export const ProductDesigner = () => {
                         width: parent.clientWidth,
                         height: 500
                     });
+
+                    // Center the "shirt"
+                    shirtGroup.set({
+                        left: parent.clientWidth / 2,
+                        top: 250 // Center vertically in 500px height
+                    });
+                    shirtGroup.setCoords();
+                    newCanvas.renderAll();
                 }
             };
 

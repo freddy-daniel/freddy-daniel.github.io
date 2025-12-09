@@ -12,11 +12,11 @@ export const Footer = () => {
                         </p>
                     </div>
                     <div className="flex space-x-6">
-                        <a href="#" className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <a href={resumeData.personalInfo.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                             <span className="sr-only">GitHub</span>
                             <FaGithub className="h-6 w-6" />
                         </a>
-                        <a href="#" className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <a href={resumeData.personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                             <span className="sr-only">LinkedIn</span>
                             <FaLinkedin className="h-6 w-6" />
                         </a>

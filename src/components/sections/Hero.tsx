@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { resumeData } from '../../data/resumeData';
 import { FaEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import profileImage from '../../assets/profile_placeholder.png';
 
 export const Hero = () => {
   const containerVariants = {
@@ -88,10 +89,11 @@ export const Hero = () => {
           <div className="relative w-64 h-64 md:w-80 md:h-80">
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-cyan-400 rounded-full blur-2xl opacity-20 animate-pulse"></div>
             <div className="relative w-full h-full rounded-full border-4 border-white dark:border-gray-800 shadow-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              {/* Placeholder for profile image, using initials for now */}
-              <span className="text-6xl font-bold text-gray-400 dark:text-gray-600">
-                {resumeData.personalInfo.name.split(' ').map(n => n[0]).join('')}
-              </span>
+              <img
+                src={profileImage}
+                alt={resumeData.personalInfo.name}
+                className="w-full h-full object-cover"
+              />
             </div>
 
             {/* Float cards */}
