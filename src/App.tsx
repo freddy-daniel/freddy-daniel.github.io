@@ -1,21 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
-import { Hero } from './components/sections/Hero';
-import { Experience } from './components/sections/Experience';
-import { Skills } from './components/sections/Skills';
-import { Projects } from './components/sections/Projects';
-import { Demos } from './components/demos/Demos';
+import { Home } from './components/pages/Home';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Hero />} />
-          <Route path="experience" element={<Experience />} />
-          <Route path="skills" element={<Skills />} />
-          <Route path="projects" element={<Projects />} />
-          <Route path="demos" element={<Demos />} />
+          <Route index element={<Home />} />
+          <Route path="experience" element={<Home />} />
+          <Route path="skills" element={<Home />} />
+          <Route path="projects" element={<Home />} />
+          <Route path="demos" element={<Home />} />
         </Route>
       </Routes>
     </Router>
