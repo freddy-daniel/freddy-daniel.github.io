@@ -55,6 +55,33 @@ export const Whiteboard = () => {
     contextRef.current?.stroke();
   };
 
+  const getTouchPos = (touch: React.Touch) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    };
+  };
+
+  const startDrawingTouch = (e: React.TouchEvent) => {
+    // Prevent scrolling
+    // Note: 'touch-action: none' in CSS is better, but preventDefault works for simple cases if event is not passive
+    // React's onTouchMove is passive by default in some versions, but let's try relying on CSS class 'touch-none' which is already there.
+    const { x, y } = getTouchPos(e.touches[0]);
+    contextRef.current?.beginPath();
+    contextRef.current?.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const drawTouch = (e: React.TouchEvent) => {
+    if (!isDrawing) return;
+    const { x, y } = getTouchPos(e.touches[0]);
+    contextRef.current?.lineTo(x, y);
+    contextRef.current?.stroke();
+  };
+
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (canvas && contextRef.current) {
@@ -106,6 +133,10 @@ export const Whiteboard = () => {
           onMouseUp={finishDrawing}
           onMouseLeave={finishDrawing}
           onMouseMove={draw}
+          onTouchStart={startDrawingTouch}
+          onTouchMove={drawTouch}
+          onTouchEnd={finishDrawing}
+          onTouchCancel={finishDrawing}
           className="w-full h-full block touch-none"
           style={{ width: '100%', height: '100%' }}
         />
