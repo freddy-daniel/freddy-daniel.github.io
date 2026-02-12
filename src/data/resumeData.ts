@@ -4,8 +4,8 @@ export const resumeData = {
         title: "Tech Lead",
         phone: "REDACTED",
         email: "freddysend@gmail.com",
-        github: "https://github.com/",
-        linkedin: "https://www.linkedin.com/",
+        github: "https://github.com/freddy-daniel",
+        linkedin: "https://www.linkedin.com/in/freddy-daniel/",
         address: "Kerala, India",
         languages: ["English", "Malayalam"],
         dob: "REDACTED"
