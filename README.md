@@ -55,3 +55,15 @@ the `_nuxt/` directory) and a `404.html` fallback.
 ## Licence
 
 Code is MIT. The written content, the resume and the personal details are not.
+
+## Moving the custom domain
+
+The site currently serves from `freddydaniel.me`. To move it to
+`freddydaniel.dev`, repoint that domain's DNS at GitHub Pages, then run:
+
+```bash
+./scripts/cutover-to-dev.sh
+```
+
+It refuses to run until DNS has actually moved, so it cannot take the site
+offline by being run too early.
