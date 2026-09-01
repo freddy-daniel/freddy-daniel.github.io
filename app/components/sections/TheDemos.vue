@@ -5,28 +5,24 @@ const tabs = [
     label: 'Device manager',
     icon: 'lucide:mic',
     blurb: 'The reusable camera and microphone picker, rebuilt. Permission states, hidden labels, hot-plug and persisted selection.',
-    from: 'From the device selection library',
   },
   {
     id: 'webrtc',
     label: 'WebRTC handshake',
     icon: 'lucide:radio',
     blurb: 'Two peer connections negotiating in this page: offer, answer, ICE, connected. No server, no camera permission.',
-    from: 'From hand-rolled signalling on the video conferencing platform',
   },
   {
     id: 'zones',
     label: 'Zone calibration',
     icon: 'lucide:scan-line',
     blurb: 'Draw the bed, the chair and the floor over a camera frame so a detection can be read as normal or as an emergency.',
-    from: 'From the fall-detection alarm tool',
   },
   {
     id: 'charts',
     label: 'Render performance',
     icon: 'lucide:activity',
     blurb: 'The same dataset drawn twice, timed. Four settings are the whole difference.',
-    from: 'From the analytics dashboard rebuild',
   },
 ] as const
 
@@ -80,10 +76,9 @@ watch(activeTab, (id) => {
         </button>
       </div>
 
-      <div class="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <p class="text-[15px] leading-relaxed text-[var(--ink-muted)]">{{ current.blurb }}</p>
-        <span class="label-mono">{{ current.from }}</span>
-      </div>
+      <p class="mt-5 max-w-3xl text-[15px] leading-relaxed text-[var(--ink-muted)]">
+        {{ current.blurb }}
+      </p>
 
       <div class="mt-6">
         <!-- Every demo touches browser-only APIs, and each is a separate chunk
