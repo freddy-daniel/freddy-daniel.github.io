@@ -210,7 +210,7 @@ export const roles: Role[] = [
     period: 'Feb 2020 — Present',
     location: 'Infopark Kochi, remote',
     highlights: [
-      'Lead a team of five to six engineers on the web client and admin console for the video conferencing platform, the company\'s video conferencing product, while staying roughly 80% hands-on in the code.',
+      'Lead a team of five to six engineers on the web client and admin console for the company\'s video conferencing product, while staying roughly 80% hands-on in the code.',
       'Built a reusable device selection library in JavaScript, cutting feature development time by around 60% through standardisation and reuse.',
       'Developed real-time co-watch, synchronising playback of YouTube, Vimeo, Dailymotion and local video inside live conferencing sessions.',
       'Engineered a canvas-based alarm calibration tool with Fabric.js, combining video segmentation with ML action detection to define bed, chair and floor zones for fall and inactivity alerts.',
@@ -270,6 +270,7 @@ export const skillTiers = [
       'MongoDB',
       'MySQL',
       'REST APIs',
+      'Vue 2 / Vuex',
       'Vite',
       'Git',
     ],
@@ -284,7 +285,6 @@ export const skillTiers = [
       'Knockout.js',
       'NW.js',
       'Java / Spring Boot',
-      'Vue 2 / Vuex',
     ],
   },
 ]
