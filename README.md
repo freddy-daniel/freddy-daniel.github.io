@@ -1,7 +1,7 @@
 # freddy-daniel.github.io
 
 Personal site for **Freddy Daniel**, Senior Frontend Engineer (Vue and Nuxt).
-Live at **https://freddy-daniel.github.io**
+Live at **https://freddydaniel.me**
 
 Built with Nuxt 4, statically generated, deployed to GitHub Pages on every push
 to `main`. No backend, no analytics, no trackers.

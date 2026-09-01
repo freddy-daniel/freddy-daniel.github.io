@@ -46,7 +46,9 @@ export const personal = {
   githubHandle: 'freddy-daniel',
   linkedin: 'https://www.linkedin.com/in/freddy-daniel/',
   linkedinHandle: 'in/freddy-daniel',
-  site: 'https://freddy-daniel.github.io',
+  // Single place to change when the custom domain moves to freddydaniel.dev;
+  // must match public/CNAME or the canonical and OG URLs will be wrong.
+  site: 'https://freddydaniel.me',
   resumePath: '/Freddy-Daniel-Resume.pdf',
   availability: 'Open to Senior Frontend roles',
   headline:
