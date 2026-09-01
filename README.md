@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# freddy-daniel.github.io
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal site for **Freddy Daniel**, Senior Frontend Engineer (Vue and Nuxt).
+Live at **https://freddy-daniel.github.io**
 
-Currently, two official plugins are available:
+Built with Nuxt 4, statically generated, deployed to GitHub Pages on every push
+to `main`. No backend, no analytics, no trackers.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Why it looks like this
 
-## React Compiler
+Most engineering portfolios are a resume with a stylesheet. This one tries to be
+the opposite: the case studies carry the reasoning and the trade-offs, and each
+of the four demos is a working reconstruction of something I actually shipped,
+running in your browser rather than shown as a screenshot.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Demo | What it reconstructs |
+| --- | --- |
+| **Device manager** | The reusable camera and mic selection library. Permission states, the empty-label problem, `devicechange` hot-plug, persisted selection with a fallback when the hardware is gone. |
+| **WebRTC handshake** | A full offer/answer/ICE negotiation between two `RTCPeerConnection`s on one page, logged step by step. Media source is a canvas via `captureStream()`, so it needs no server and no camera permission. |
+| **Zone calibration** | The Fabric.js tool for the fall-detection alarm. Draw bed, chair and floor zones over a camera frame, export normalised polygon geometry. |
+| **Render performance** | The analytics dashboard rebuild. The same dataset drawn naively and tuned, timed live. LTTB decimation, `pointRadius: 0`, `parsing: false`, animation off. |
 
-## Expanding the ESLint configuration
+## Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Nuxt 4 · Vue 3 · TypeScript · Tailwind CSS v4 · Chart.js · Fabric.js
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+All content lives in one typed file, [`app/data/profile.ts`](app/data/profile.ts),
+so the site and the downloadable resume cannot drift apart.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Running it
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run generate           # static output in .output/public
+npx serve .output/public   # verify the real artifact, not the dev server
 ```
+
+The demos need a secure context for `getUserMedia`. `localhost` and the
+deployed HTTPS site both qualify; opening `index.html` from the filesystem
+does not.
+
+## Deploying
+
+`.github/workflows/deploy.yml` runs `npm ci && npm run generate` and publishes
+`.output/public`. The Pages source must be set to **GitHub Actions** under
+Settings → Pages, not "Deploy from a branch".
+
+The `github_pages` Nitro preset emits `.nojekyll` (without it Jekyll swallows
+the `_nuxt/` directory) and a `404.html` fallback.
+
+## Licence
+
+Code is MIT. The written content, the resume and the personal details are not.
