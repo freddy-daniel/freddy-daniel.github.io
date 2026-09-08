@@ -9,7 +9,7 @@ const showCerts = ref(false)
       <SectionHeading
         eyebrow="Experience"
         title="Nine years, one company"
-        lead="Techgentsia is a startup-shaped company with no formal mentoring structure, so most of what is below I worked out and shipped on my own."
+        lead="One company, and a lot of range: web clients, admin consoles, desktop builds and real-time systems. Most of what is below I owned end to end, from first spec through to production."
       />
 
       <div class="mt-12 grid gap-12 lg:grid-cols-[1.6fr_1fr] lg:gap-16">

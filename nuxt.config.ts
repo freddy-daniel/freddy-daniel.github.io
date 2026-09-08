@@ -45,7 +45,6 @@ export default defineNuxtConfig({
         'lucide:zap',
         'lucide:package-check',
         'lucide:archive',
-        'lucide:radio',
         'lucide:menu',
         'lucide:x',
       ],

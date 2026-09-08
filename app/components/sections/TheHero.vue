@@ -48,10 +48,10 @@ import { personal, metrics } from '~/data/profile'
               <Icon name="lucide:download" class="h-4 w-4" /> Download resume
             </a>
             <a
-              href="#demos"
+              href="#work"
               class="inline-flex items-center gap-2 rounded-lg border border-[var(--border-strong)] px-5 py-3 text-sm font-medium transition-colors hover:bg-[var(--surface-sunken)]"
             >
-              <Icon name="lucide:play" class="h-4 w-4" /> See it running
+              <Icon name="lucide:arrow-down" class="h-4 w-4" /> See the work
             </a>
             <a
               :href="`mailto:${personal.email}`"

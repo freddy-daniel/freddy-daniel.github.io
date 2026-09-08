@@ -10,7 +10,7 @@ function toggle(id: string) {
 </script>
 
 <template>
-  <section id="work" class="border-b border-[var(--border)] py-20 sm:py-24">
+  <section id="work" class="border-b border-[var(--border)] bg-[var(--surface-sunken)] py-20 sm:py-24">
     <div class="container-page">
       <SectionHeading
         eyebrow="Case studies"

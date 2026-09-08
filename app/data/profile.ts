@@ -307,7 +307,6 @@ export const certifications = [
 
 export const sections = [
   { id: 'top', label: 'Home' },
-  { id: 'demos', label: 'Demos' },
   { id: 'work', label: 'Work' },
   { id: 'experience', label: 'Experience' },
   { id: 'skills', label: 'Skills' },
