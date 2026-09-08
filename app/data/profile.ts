@@ -37,7 +37,7 @@ export interface Role {
 export const personal = {
   name: 'Freddy Daniel',
   firstName: 'Freddy',
-  title: 'Senior Frontend Engineer',
+  title: 'Senior Software Engineer',
   specialism: 'Vue & Nuxt',
   location: 'Alappuzha, Kerala, India',
   locationNote: 'Remote since 2020',
@@ -50,11 +50,11 @@ export const personal = {
   // must match public/CNAME or the canonical and OG URLs will be wrong.
   site: 'https://freddydaniel.me',
   resumePath: '/Freddy-Daniel-Resume.pdf',
-  availability: 'Open to Senior Frontend roles',
+  availability: 'Open to Senior Software Engineer roles',
   headline:
     'Nine years building real-time web applications at one company. Video conferencing, telehealth, and virtual classrooms, almost entirely in Vue and Nuxt.',
   positioning:
-    'I work on the hard end of the browser: WebRTC sessions, canvas tooling, Electron desktop builds, and dashboards that have to stay fast with a lot of data on screen. I am looking for a product-focused team where frontend architecture actually matters.',
+    'I work on the hard end of the browser: WebRTC sessions, canvas tooling, Electron desktop builds, and dashboards that have to stay fast with a lot of data on screen, backed by the Node services behind them. I am looking for a product-focused team where architecture actually matters.',
   languages: [
     { name: 'English', level: 'Full professional proficiency' },
     { name: 'Malayalam', level: 'Native' },
@@ -80,7 +80,7 @@ export const metrics: Metric[] = [
   {
     value: '7 yrs',
     label: 'Vue and Nuxt',
-    detail: 'Continuous frontend specialisation, Vue 2 through Nuxt 4',
+    detail: 'Continuous specialisation, Vue 2 through Nuxt 4',
   },
 ]
 
@@ -236,8 +236,9 @@ export const roles: Role[] = [
 ]
 
 /**
- * Tiered rather than a flat wall of badges. The "Prior" tier is the point:
- * naming what has gone stale is what makes the first two tiers believable.
+ * Grouped by how current each skill is rather than dumped as a flat wall of
+ * badges. Being specific about what is daily versus what came earlier is what
+ * makes the first two groups believable.
  */
 export const skillTiers = [
   {
@@ -276,8 +277,8 @@ export const skillTiers = [
     ],
   },
   {
-    tier: 'Prior, now rusty',
-    note: 'Used it, would need to warm up before interviewing on it.',
+    tier: 'Used in earlier work',
+    note: 'Shipped production work with these earlier in my career.',
     icon: 'lucide:archive',
     skills: [
       'PHP / CodeIgniter',

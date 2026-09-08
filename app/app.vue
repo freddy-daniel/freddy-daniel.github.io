@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { personal } from '~/data/profile'
 
-const description = `${personal.name}, ${personal.title} with 9+ years building real-time web applications in Vue and Nuxt. WebRTC, Electron, canvas tooling and frontend performance.`
+const description = `${personal.name}, ${personal.title} with 9+ years building real-time web applications in Vue and Nuxt. WebRTC, Electron, canvas tooling, Node services and web performance.`
 
 useSeoMeta({
   title: `${personal.name} — ${personal.title}, Vue & Nuxt`,
@@ -34,7 +34,7 @@ useHead({
         url: personal.site,
         sameAs: [personal.github, personal.linkedin],
         address: { '@type': 'PostalAddress', addressLocality: 'Alappuzha', addressRegion: 'Kerala', addressCountry: 'IN' },
-        knowsAbout: ['Vue.js', 'Nuxt.js', 'TypeScript', 'WebRTC', 'Electron.js', 'Node.js', 'Frontend performance'],
+        knowsAbout: ['Vue.js', 'Nuxt.js', 'TypeScript', 'WebRTC', 'Electron.js', 'Node.js', 'Web performance'],
       }),
     },
   ],

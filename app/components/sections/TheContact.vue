@@ -13,13 +13,13 @@ import { personal } from '~/data/profile'
             {{ personal.availability }}
           </h2>
           <p class="mt-4 text-[15px] leading-relaxed text-[var(--ink-muted)]">
-            Vue and Nuxt roles first, senior frontend on any modern JavaScript stack second.
+            Vue and Nuxt roles first, senior engineering roles on any modern JavaScript stack second.
             Remote, hybrid or onsite in India, and open to relocating. Email is the fastest way to reach me.
           </p>
 
           <div class="mt-8 flex flex-wrap gap-3">
             <a
-              :href="`mailto:${personal.email}?subject=Senior%20Frontend%20role`"
+              :href="`mailto:${personal.email}?subject=Senior%20Software%20Engineer%20role`"
               class="inline-flex items-center gap-2 rounded-lg bg-[var(--ink)] px-5 py-3 text-sm font-medium text-[var(--surface)] transition-opacity hover:opacity-90"
             >
               <Icon name="lucide:mail" class="h-4 w-4" /> {{ personal.email }}

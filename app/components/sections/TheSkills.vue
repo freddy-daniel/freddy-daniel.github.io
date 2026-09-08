@@ -8,7 +8,7 @@ import { skillTiers } from '~/data/profile'
       <SectionHeading
         eyebrow="Skills"
         title="Sorted by how well I actually know them"
-        lead="A flat list of thirty logos tells you nothing. This is tiered, and the bottom tier is the honest one: things I have shipped with but would need to warm up before being tested on."
+        lead="A flat list of thirty logos tells you nothing. These are grouped by how current they are, so you can see what I work in every day and what I built with earlier on."
       />
 
       <div class="mt-12 grid gap-4 md:grid-cols-3">
