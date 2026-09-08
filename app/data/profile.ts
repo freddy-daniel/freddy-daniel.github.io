@@ -52,7 +52,7 @@ export const personal = {
   resumePath: '/Freddy-Daniel-Resume.pdf',
   availability: 'Open to Senior Software Engineer roles',
   headline:
-    'Nine years building real-time web applications at one company. Video conferencing, telehealth, and virtual classrooms, almost entirely in Vue and Nuxt.',
+    'Nine years building real-time web applications. Video conferencing, telehealth, and virtual classrooms, almost entirely in Vue and Nuxt.',
   positioning:
     'I work on the hard end of the browser: WebRTC sessions, canvas tooling, Electron desktop builds, and dashboards that have to stay fast with a lot of data on screen, backed by the Node services behind them. I am looking for a product-focused team where architecture actually matters.',
   languages: [
@@ -65,7 +65,7 @@ export const metrics: Metric[] = [
   {
     value: '9+',
     label: 'Years shipping',
-    detail: 'Enterprise web and desktop, one company, 2017 to now',
+    detail: 'Enterprise web and desktop, 2017 to now',
   },
   {
     value: '~60%',

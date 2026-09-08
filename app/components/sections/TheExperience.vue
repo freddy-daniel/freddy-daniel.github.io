@@ -8,8 +8,8 @@ const showCerts = ref(false)
     <div class="container-page">
       <SectionHeading
         eyebrow="Experience"
-        title="Nine years, one company"
-        lead="One company, and a lot of range: web clients, admin consoles, desktop builds and real-time systems. Most of what is below I owned end to end, from first spec through to production."
+        title="From PHP services to real-time video platforms"
+        lead="Three roles and a widening remit: backend web services first, then real-time video and cross-platform desktop, then leading the web team while staying hands-on in the code. Most of what is below I owned end to end, from first spec through to production."
       />
 
       <div class="mt-12 grid gap-12 lg:grid-cols-[1.6fr_1fr] lg:gap-16">
