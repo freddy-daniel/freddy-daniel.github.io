@@ -1,7 +1,3 @@
 <template>
-  <SectionsTheHero />
-  <SectionsTheWork />
-  <SectionsTheExperience />
-  <SectionsTheSkills />
-  <SectionsTheContact />
+  <ResumePage />
 </template>

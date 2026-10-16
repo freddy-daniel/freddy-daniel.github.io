@@ -21,10 +21,10 @@ export function useScrollSpy(ids: readonly string[]) {
         if (first) active.value = first
       },
       {
-        // Top inset clears the sticky header; the large bottom inset keeps
-        // the band of interest near the top of the viewport, so a tall
-        // section does not stay "active" long after it has scrolled past.
-        rootMargin: '-88px 0px -55% 0px',
+        // The large bottom inset keeps the band of interest near the top of
+        // the viewport, so a tall section does not stay "active" long after
+        // it has scrolled past.
+        rootMargin: '0px 0px -60% 0px',
         threshold: 0,
       },
     )

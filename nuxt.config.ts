@@ -7,11 +7,7 @@ export default defineNuxtConfig({
   // Prerendered at build time, shipped to GitHub Pages as plain files.
   ssr: true,
 
-  modules: [
-    '@nuxtjs/color-mode',
-    '@nuxt/fonts',
-    '@nuxt/icon',
-  ],
+  modules: ['@nuxt/fonts'],
 
   css: ['~/assets/css/main.css'],
 
@@ -19,41 +15,10 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
 
-  // Puts a bare `.dark` / `.light` class on <html> before first paint,
-  // which is what kills the theme flash on load.
-  colorMode: {
-    classSuffix: '',
-    preference: 'system',
-    fallback: 'light',
-    storageKey: 'freddy-theme',
-  },
-
-  // Only the icons actually referenced in templates get bundled, so the
-  // static build never calls the Iconify API at runtime.
-  icon: {
-    clientBundle: {
-      scan: true,
-      sizeLimitKb: 256,
-      // Bound to :name in templates, so the scanner cannot see them.
-      icons: [
-        'lucide:mic',
-        'lucide:monitor-play',
-        'lucide:scan-line',
-        'lucide:activity',
-        'lucide:app-window',
-        'lucide:store',
-        'lucide:zap',
-        'lucide:package-check',
-        'lucide:archive',
-        'lucide:menu',
-        'lucide:x',
-      ],
-    },
-  },
-
   fonts: {
     families: [
-      { name: 'Inter', provider: 'google', weights: [400, 500, 600, 700, 800] },
+      { name: 'Newsreader', provider: 'google', weights: [400, 500], styles: ['normal'] },
+      { name: 'IBM Plex Sans', provider: 'google', weights: [400, 500, 600], styles: ['normal'] },
     ],
   },
 
@@ -71,7 +36,20 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        // The desk under the laptop in the intro; wanted on first paint.
+        { rel: 'preload', as: 'image', href: '/wood.jpg' },
+      ],
+      // The laptop intro only renders when `js` is present, so without
+      // JavaScript the page is a plain resume instead of a laptop that never
+      // opens. `intro-done` skips the intro on reloads after it has been opened
+      // in this tab (key shared with LaptopIntro.vue). Runs in <head>, before
+      // first paint, so there is no flash either way.
+      script: [{
+        innerHTML: 'document.documentElement.classList.add(\'js\');'
+          + 'try{if(sessionStorage.getItem(\'laptop-open\'))document.documentElement.classList.add(\'intro-done\')}catch(e){}',
+      }],
     },
   },
 

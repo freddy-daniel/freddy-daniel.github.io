@@ -1,6 +1,6 @@
 # freddy-daniel.github.io
 
-Personal site for **Freddy Daniel**, Senior Frontend Engineer (Vue and Nuxt).
+Personal site for **Freddy Daniel**, Senior Software Engineer (Vue and Nuxt).
 Live at **https://freddydaniel.me**
 
 Built with Nuxt 4, statically generated, deployed to GitHub Pages on every push
@@ -8,10 +8,12 @@ to `main`. No backend, no analytics, no trackers.
 
 ## Why it looks like this
 
-Most engineering portfolios are a resume with a stylesheet. This one tries to be
-the opposite: the case studies carry the reasoning and the trade-offs, and the
-skills are tiered by how well I actually know them rather than listed flat as a
-wall of logos.
+It opens as a closed laptop on a wooden desk with my name on the lid. Scrolling,
+clicking it, or waiting a moment opens it and zooms into the screen, and what
+is on the screen is the site itself: a plain, resume-style page on a white
+background. The case studies carry the reasoning and the trade-offs, and the
+skills are grouped by how current they are rather than listed flat as a wall
+of logos.
 
 ## Stack
 

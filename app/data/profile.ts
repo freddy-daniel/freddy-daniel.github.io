@@ -6,12 +6,6 @@
  * address: this page is public and gets scraped.
  */
 
-export interface Metric {
-  value: string
-  label: string
-  detail: string
-}
-
 export interface CaseStudy {
   id: string
   title: string
@@ -23,7 +17,6 @@ export interface CaseStudy {
   result: string
   /** The honest caveat. Interviewers trust a candidate who names their own limits. */
   tradeoff?: string
-  icon: string
 }
 
 export interface Role {
@@ -61,29 +54,6 @@ export const personal = {
   ],
 } as const
 
-export const metrics: Metric[] = [
-  {
-    value: '9+',
-    label: 'Years shipping',
-    detail: 'Enterprise web and desktop, 2017 to now',
-  },
-  {
-    value: '~60%',
-    label: 'Less feature time',
-    detail: 'After standardising device selection into one shared library',
-  },
-  {
-    value: '20s → 3s',
-    label: 'Dashboard load',
-    detail: 'Analytics rebuild on large datasets, Vuetify and Chart.js',
-  },
-  {
-    value: '7 yrs',
-    label: 'Vue and Nuxt',
-    detail: 'Continuous specialisation, Vue 2 through Nuxt 4',
-  },
-]
-
 export const caseStudies: CaseStudy[] = [
   {
     id: 'device-library',
@@ -91,7 +61,6 @@ export const caseStudies: CaseStudy[] = [
     context: 'Video conferencing platform, Techgentsia',
     period: '2025',
     stack: ['JavaScript', 'Vue 3', 'Nuxt', 'MediaDevices API'],
-    icon: 'lucide:mic',
     problem:
       'Camera and microphone pickers had been rewritten by hand in every surface of the product: the web client, the admin console, the Electron desktop app and the pre-call test page. Each one handled permissions, device labels and hot-plug slightly differently, so a bug fixed in one place stayed broken in three others.',
     approach: [
@@ -109,9 +78,8 @@ export const caseStudies: CaseStudy[] = [
     id: 'cowatch',
     title: 'Real-time co-watch inside live conferencing',
     context: 'Video conferencing platform, Techgentsia',
-    period: '2023 – 2024',
+    period: '2023 - 2024',
     stack: ['WebRTC', 'WebSocket', 'Video.js', 'Vue 3'],
-    icon: 'lucide:monitor-play',
     problem:
       'Participants in a live call needed to watch the same video together, covering both hosted platforms (YouTube, Vimeo, Dailymotion) and a local file on one participant\'s machine.',
     approach: [
@@ -129,9 +97,8 @@ export const caseStudies: CaseStudy[] = [
     id: 'fall-detection',
     title: 'Canvas zone calibration for fall detection',
     context: 'Healthcare platform, Techgentsia',
-    period: '2022 – 2023',
+    period: '2022 - 2023',
     stack: ['Fabric.js', 'Canvas', 'Vue', 'Nuxt 3'],
-    icon: 'lucide:scan-line',
     problem:
       'An ML model detected people and actions in a room camera feed, but it had no idea what the room meant. Someone lying down is normal in a bed and an emergency on the floor. Nurses, not engineers, had to be the ones to draw that distinction, per room, on site.',
     approach: [
@@ -147,9 +114,8 @@ export const caseStudies: CaseStudy[] = [
     id: 'analytics-perf',
     title: 'Analytics dashboard, 20 seconds to 3',
     context: 'Techgentsia',
-    period: '2022 – 2023',
+    period: '2022 - 2023',
     stack: ['Vue 3', 'Vuetify', 'Chart.js', 'Performance'],
-    icon: 'lucide:activity',
     problem:
       'The dashboard took around 20 seconds to become usable on the largest customer datasets. Every chart rendered every raw point, and the whole page waited on the slowest query before showing anything.',
     approach: [
@@ -167,9 +133,8 @@ export const caseStudies: CaseStudy[] = [
     id: 'electron',
     title: 'White-labelled cross-platform desktop client',
     context: 'Video conferencing platform, Techgentsia',
-    period: '2021 – 2023',
+    period: '2021 - 2023',
     stack: ['Electron.js', 'Node.js', 'Vue', 'CI builds'],
-    icon: 'lucide:app-window',
     problem:
       'Enterprise customers wanted the conferencing client as an installable desktop app under their own brand, on both Windows and macOS. Maintaining a hand-built fork per customer was not going to survive more than two or three of them.',
     approach: [
@@ -184,9 +149,8 @@ export const caseStudies: CaseStudy[] = [
     id: 'business-tracker',
     title: 'Business Tracker, a B2B queue and profit app',
     context: 'Own product, solo',
-    period: '2025 – now',
+    period: '2025 - now',
     stack: ['React Native', 'Expo', 'Node.js', 'Web Push'],
-    icon: 'lucide:store',
     problem:
       'Small shops in India run customer queues on paper and track profit in their heads. I am building a mobile app for token-based queuing and daily profit tracking, and selling it to non-technical shop owners.',
     approach: [
@@ -207,7 +171,7 @@ export const roles: Role[] = [
   {
     title: 'Senior Software Engineer, Web Team Lead',
     org: 'Techgentsia Software Technologies Pvt Ltd',
-    period: 'Feb 2020 — Present',
+    period: 'Feb 2020 - Present',
     location: 'Infopark Kochi, remote',
     highlights: [
       'Lead a team of five to six engineers on the web client and admin console for the company\'s video conferencing product, while staying roughly 80% hands-on in the code.',
@@ -223,7 +187,7 @@ export const roles: Role[] = [
   {
     title: 'Software Engineer',
     org: 'Techgentsia Software Technologies Pvt Ltd',
-    period: 'Feb 2017 — Feb 2020',
+    period: 'Feb 2017 - Feb 2020',
     location: 'Cherthala, Kerala',
     highlights: [
       'Built and maintained RESTful APIs with PHP, CodeIgniter and MySQL for scalable web applications.',
@@ -244,7 +208,6 @@ export const skillTiers = [
   {
     tier: 'Core',
     note: 'Daily, for years. Ask me anything here.',
-    icon: 'lucide:zap',
     skills: [
       'Vue 3',
       'Nuxt 3 / 4',
@@ -260,7 +223,6 @@ export const skillTiers = [
   {
     tier: 'Shipped in production',
     note: 'Built and maintained real features with these.',
-    icon: 'lucide:package-check',
     skills: [
       'WebRTC',
       'WebSocket / Socket.io',
@@ -279,7 +241,6 @@ export const skillTiers = [
   {
     tier: 'Used in earlier work',
     note: 'Shipped production work with these earlier in my career.',
-    icon: 'lucide:archive',
     skills: [
       'PHP / CodeIgniter',
       'jQuery',
@@ -293,23 +254,16 @@ export const skillTiers = [
 export const education = {
   degree: 'Bachelor of Computer Applications',
   institution: 'Annamalai University, Tamil Nadu',
-  period: '2017 — 2022',
+  period: '2017 - 2022',
   note: 'Studied by distance while working full time. Self-taught into software before that.',
 }
 
 export const certifications = [
-  'Developing Back-End Apps with Node.js and Express — IBM, Coursera',
-  'Introduction to Software Engineering — IBM, Coursera',
-  'Introduction to Cloud Computing — IBM, Coursera',
-  'Front-End Web UI Frameworks and Tools: Bootstrap 4 — HKUST',
-  'Getting Started with Git and GitHub — IBM, Coursera',
-  'Introduction to Web Development with HTML, CSS, JavaScript — IBM, Coursera',
+  'Developing Back-End Apps with Node.js and Express (IBM, Coursera)',
+  'Introduction to Software Engineering (IBM, Coursera)',
+  'Introduction to Cloud Computing (IBM, Coursera)',
+  'Front-End Web UI Frameworks and Tools: Bootstrap 4 (HKUST)',
+  'Getting Started with Git and GitHub (IBM, Coursera)',
+  'Introduction to Web Development with HTML, CSS, JavaScript (IBM, Coursera)',
 ]
 
-export const sections = [
-  { id: 'top', label: 'Home' },
-  { id: 'work', label: 'Work' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'contact', label: 'Contact' },
-] as const
