@@ -24,6 +24,10 @@ import { personal } from '~/data/profile'
 const TILT_START = 32
 const TILT_END = 72
 const YAW_START = -11
+
+// The coffee mug on the desk is switched off while it still has rendering
+// issues; its markup, styles and public/latte-art.svg are kept for later.
+const SHOW_MUG = false
 // Lid opening angle relative to the base. TILT_END + LID = 180 puts the screen
 // exactly face-on at the end, so the zoom needs no 3D correction.
 const LID = 180 - TILT_END
@@ -43,12 +47,15 @@ const GESTURE_GAP = 150
 // After the page comes to rest at the top, scrolling only counts after this
 // long, so arriving at the top never closes the laptop by itself.
 const SETTLE = 500
+// How long scrolling must have stopped before the open laptop collapses.
+const SETTLE_DELAY = 180
 
-// Thickness is built from stacked outlines, which keeps the rounded corners
-// correct from every angle. Colours run from the lit chamfer to the underside.
-const baseEdges = ['#58627a', '#3a4252', '#30374a', '#2a3141', '#252b39', '#202531', '#1b1f29']
-const lidEdges = ['#08090c', '#2c3343', '#56607a']
-const deskEdges = ['#e1b987', '#d3a671', '#cc9e69', '#c69763', '#c0905c', '#b98955', '#b2824f', '#aa7a48', '#a17142', '#97683b']
+// The laptop's thickness is built from a few stacked outlines, which keeps the
+// rounded corners correct from every angle. Colours run from the lit chamfer to
+// the underside. Every slice is a composited layer, so keep the count low:
+// phones run out of graphics memory well before desktops do.
+const baseEdges = ['#58627a', '#30374a', '#252b39', '#1b1f29']
+const lidEdges = ['#08090c', '#56607a']
 const deskLegs = [
   { x: 'left', y: 'front' },
   { x: 'right', y: 'front' },
@@ -71,6 +78,8 @@ const runway = ref<HTMLElement | null>(null)
 const stage = ref<HTMLElement | null>(null)
 const camera = ref<HTMLElement | null>(null)
 const world = ref<HTMLElement | null>(null)
+// The room's frame of reference and its copies for the mug; all move together.
+let worlds: HTMLElement[] = []
 const laptop = ref<HTMLElement | null>(null)
 const lid = ref<HTMLElement | null>(null)
 const display = ref<HTMLElement | null>(null)
@@ -86,6 +95,7 @@ const layout = reactive({
 })
 
 let runwayLength = 1
+let measuredSize = ''
 let lidHeight = 0
 let zoomMax = 1
 // How far the view pulls back while the laptop opens, to show the room.
@@ -95,6 +105,8 @@ let tween = 0
 let autoTimer: ReturnType<typeof setTimeout> | undefined
 
 let collapsed = false
+let settleTimer: ReturnType<typeof setTimeout> | undefined
+let touching = false
 let pull = 0
 let pullTimer: ReturnType<typeof setTimeout> | undefined
 // When the page last came to rest at the top, and the previous wheel event.
@@ -124,6 +136,7 @@ function measure() {
   const dw = display.value.offsetWidth
   const dh = display.value.offsetHeight
 
+  measuredSize = `${sw}x${sh}`
   runwayLength = runway.value.offsetHeight
   lidHeight = laptop.value.offsetHeight
   // Cover, not contain: the screen must fill the viewport on any aspect ratio.
@@ -140,10 +153,12 @@ function render() {
   if (collapsed) return
   if (!stage.value || !camera.value || !world.value || !laptop.value || !lid.value || !screen.value || !cta.value) return
 
-  if (window.scrollY >= runwayLength - 1) {
-    collapse()
-    return
-  }
+  // Fully open: the page underneath is exactly in view, so hide the scene and
+  // collapse once scrolling has come to rest (see settle()).
+  const done = window.scrollY >= runwayLength - 1
+  stage.value.style.visibility = done ? 'hidden' : ''
+  if (done) return settle()
+  clearTimeout(settleTimer)
 
   const p = clamp(window.scrollY / runwayLength)
   const lift = easeInOut(clamp(p / 0.42))
@@ -158,7 +173,8 @@ function render() {
   // Pull back to show the room, then zoom from there into the screen.
   const scale = (1 + (pullBack - 1) * back) * (zoomMax / pullBack) ** zoom
 
-  world.value.style.transform = `translateY(${shift}px) rotateX(${tilt}deg)`
+  const worldTransform = `translateY(${shift}px) rotateX(${tilt}deg)`
+  for (const w of worlds) w.style.transform = worldTransform
   laptop.value.style.transform = `rotateZ(${YAW_START * (1 - turn)}deg)`
   lid.value.style.transform = `rotateX(${open}deg)`
   camera.value.style.transform = `scale(${scale})`
@@ -172,6 +188,18 @@ function render() {
 
 function schedule() {
   if (!frame) frame = requestAnimationFrame(render)
+}
+
+// Collapsing moves the scroll position. Doing that while a swipe is still
+// coasting makes iOS Safari stop the momentum dead or jump a frame, so wait
+// until scroll events have stopped and no finger is on the screen.
+function settle() {
+  clearTimeout(settleTimer)
+  settleTimer = setTimeout(() => {
+    if (collapsed || window.scrollY < runwayLength - 1) return
+    if (touching) return settle()
+    collapse()
+  }, SETTLE_DELAY)
 }
 
 // The laptop is fully open: drop the runway so the page starts at the top.
@@ -245,16 +273,18 @@ function onWheel(e: WheelEvent) {
 }
 
 function onTouchStart(e: TouchEvent) {
+  touching = true
   touchStartY = collapsed && window.scrollY === 0 ? e.touches[0]!.clientY : null
 }
 
-// Also counts a drag that began lower down: once the page reaches the top,
-// further pulling is measured from there.
+// A drag that began lower down and brought the page to the top counts too, but
+// as with the wheel, only once the page has rested at the top for SETTLE while
+// the finger keeps pulling. A single long swipe up the page never closes it.
 function onTouchMove(e: TouchEvent) {
   if (!collapsed || window.scrollY > 0) return
   const y = e.touches[0]!.clientY
   if (touchStartY === null) {
-    touchStartY = y
+    if (performance.now() - restingSince >= SETTLE) touchStartY = y
     return
   }
   const distance = y - touchStartY
@@ -269,8 +299,15 @@ function onKeyDown(e: KeyboardEvent) {
   if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'Home') addPull(PULL_WHEEL / 2, PULL_WHEEL)
 }
 
+function onTouchEnd(e: TouchEvent) {
+  touching = e.touches.length > 0
+}
+
 function onResize() {
-  if (collapsed) return
+  if (collapsed || !stage.value) return
+  // A phone's toolbars sliding in and out resize the window but not the stage,
+  // which is 100lvh tall. Re-measuring then would only make the zoom jump.
+  if (`${stage.value.clientWidth}x${stage.value.clientHeight}` === measuredSize) return
   measure()
   schedule()
 }
@@ -320,12 +357,15 @@ function goToLinkedSection() {
 onMounted(() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
+  worlds = Array.from(camera.value?.querySelectorAll<HTMLElement>(':scope > .world') ?? [])
   collapsed = document.documentElement.classList.contains('intro-done')
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('resize', onResize)
   window.addEventListener('wheel', onWheel, { passive: true })
   window.addEventListener('touchstart', onTouchStart, { passive: true })
   window.addEventListener('touchmove', onTouchMove, { passive: true })
+  window.addEventListener('touchend', onTouchEnd, { passive: true })
+  window.addEventListener('touchcancel', onTouchEnd, { passive: true })
   window.addEventListener('keydown', onKeyDown)
   window.addEventListener('hashchange', goToLinkedSection)
   for (const type of userInput) window.addEventListener(type, stopAuto, { passive: true })
@@ -343,6 +383,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   stopAuto()
+  clearTimeout(settleTimer)
   resetPull()
   cancelAnimationFrame(frame)
   window.removeEventListener('scroll', onScroll)
@@ -350,6 +391,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('wheel', onWheel)
   window.removeEventListener('touchstart', onTouchStart)
   window.removeEventListener('touchmove', onTouchMove)
+  window.removeEventListener('touchend', onTouchEnd)
+  window.removeEventListener('touchcancel', onTouchEnd)
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('hashchange', goToLinkedSection)
   for (const type of userInput) window.removeEventListener(type, stopAuto)
@@ -367,7 +410,7 @@ const replicaStyle = computed(() => ({
 <template>
   <div ref="runway" class="intro-runway" />
 
-  <div ref="stage" class="intro-stage">
+  <div ref="stage" class="intro-stage" :class="{ 'with-mug': SHOW_MUG }">
     <div ref="camera" class="camera" @click="openLaptop">
       <div ref="world" class="world" aria-hidden="true">
         <!-- The room: a wall with a framed photo and a print, the floor and
@@ -395,12 +438,7 @@ const replicaStyle = computed(() => ({
           class="desk-leg"
           :class="[`desk-leg-${leg.x}`, `desk-leg-${leg.y}`]"
         />
-        <div
-          v-for="(color, i) in deskEdges"
-          :key="`d${i}`"
-          class="desk-edge"
-          :style="{ borderColor: color, transform: `translateZ(calc(var(--desk-z) - var(--desk-t) * ${(i + 1) / deskEdges.length}))` }"
-        />
+        <div class="desk-front" />
         <div class="desk-top" />
 
         <div ref="laptop" class="laptop">
@@ -445,6 +483,25 @@ const replicaStyle = computed(() => ({
           </div>
         </div>
       </div>
+
+      <!-- A mug of coffee to the right of the laptop: a disc for the base, an
+           upright body with the handle through its centre, and the rim and
+           coffee as a disc at rim height. Each piece is its own 3D scene, a copy
+           of the room's frame of reference, drawn after the room in this order.
+           Inside the room's scene, the body's plane would slice the desk and the
+           laptop, and Chrome draws the slices out of order. Nothing in the room
+           is ever in front of the mug from these camera angles, so drawing the
+           pieces on top, base, body, rim, is always right. -->
+      <template v-if="SHOW_MUG">
+        <div class="world" aria-hidden="true"><div class="mug-base" /></div>
+        <div class="world" aria-hidden="true">
+          <div class="mug-body">
+            <span class="mug-cup" />
+            <span class="mug-handle" />
+          </div>
+        </div>
+        <div class="world" aria-hidden="true"><div class="mug-top" /></div>
+      </template>
     </div>
 
     <div
@@ -515,6 +572,13 @@ const replicaStyle = computed(() => ({
   }
 }
 
+/* The mug's shadow on the desk: the mug's centre sits at 80.8% across and
+   68.75% back to front of the desk, and the light comes from the upper right,
+   so the shadow falls a little to the left and towards the front. */
+.intro-stage.with-mug {
+  --mug-shadow: radial-gradient(ellipse 7% 10.5% at 79% 71.5%, rgb(50 28 10 / 0.4), rgb(50 28 10 / 0.14) 60%, transparent 100%);
+}
+
 .intro-stage {
   /* 74vw leaves room for the twist and perspective on a phone. */
   --lw: min(560px, 74vw, 60svh);
@@ -536,22 +600,40 @@ const replicaStyle = computed(() => ({
   --floor-z: calc(var(--desk-z) - var(--desk-t) - var(--desk-h));
   /* The wall line, about 25 cm behind the desk, and the wall's height above the floor. */
   --wall-gap: calc(var(--lh) * 1.2);
+  /* The mug: about 8 cm across and 9 cm tall, right of the laptop. Its shadow
+     is drawn into the desk top's background, at percentages worked out from
+     these numbers; move the mug and that shadow moves with it only by hand. */
+  --mug-x: calc(var(--lw) * 1.3);
+  --mug-y: calc(var(--lh) * 0.7);
+  --mug-r: calc(var(--lw) * 0.12);
+  --mug-h: calc(var(--lw) * 0.27);
   --wall-y: calc(var(--desk-front) - var(--desk-d) - var(--wall-gap));
   --wall-h: calc(var(--desk-h) + var(--desk-t) + var(--lh) * 5);
 
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* The large viewport height does not change as a phone's toolbars come and
+     go, so the scene never resizes mid-scroll. */
+  height: 100lvh;
   z-index: 40;
   overflow: hidden;
   /* Behind the room's wall, in case any of the stage is not covered by it. */
   background-color: #ece9e3;
 }
 
+/* will-change on the camera and the flat screen tells the browser their
+   transforms change every frame. Without it, the browser re-renders every
+   layer at the new size on each frame of the zoom (about 500 re-renders over
+   60 frames on a phone), which is what made the zoom stutter. With it, it
+   scales what it already has and redraws nothing. */
 .camera {
   position: absolute;
   inset: 0;
   perspective: calc(var(--lw) * 4);
   transform-origin: 50% 50%;
+  will-change: transform;
   cursor: pointer;
 }
 
@@ -574,17 +656,18 @@ const replicaStyle = computed(() => ({
 /* Room */
 
 /* Stands up from the floor along the wall line, a pixel behind it so the two
-   planes never touch. Laid out at a third of its size and scaled up, like the
-   floor: it is a soft gradient, so this costs nothing visible. */
+   planes never touch. The wall, floor and skirting are laid out at an eighth of
+   their size and scaled up: they are soft gradients, so the browser holds an
+   eighth of the pixels in memory with no visible difference. */
 .wall {
   position: absolute;
-  top: calc(var(--wall-y) - 1px - var(--wall-h) / 3);
+  top: calc(var(--wall-y) - 1px - var(--wall-h) / 8);
   left: 50%;
-  width: calc(var(--lw) * 16 / 3);
-  height: calc(var(--wall-h) / 3);
-  margin-left: calc(var(--lw) * -8 / 3);
+  width: calc(var(--lw) * 2);
+  height: calc(var(--wall-h) / 8);
+  margin-left: calc(var(--lw) * -1);
   transform-origin: 50% 100%;
-  transform: translateZ(calc(var(--floor-z) + 1px)) rotateX(-90deg) scale(3);
+  transform: translateZ(calc(var(--floor-z) + 1px)) rotateX(-90deg) scale(8);
   /* Daylight from the upper left. */
   background: linear-gradient(165deg, #f4f2ed 0%, #eeebe5 45%, #e4dfd6 100%);
 }
@@ -639,17 +722,15 @@ const replicaStyle = computed(() => ({
   margin-top: calc(var(--lh) * 0.12);
 }
 
-/* Laid out at a third of its size and scaled up: it is a soft gradient, so
-   the browser can rasterise far less of it with no visible difference. */
 .floor {
   position: absolute;
   top: calc(var(--wall-y) + 1px);
   left: 50%;
-  width: calc(var(--lw) * 16 / 3);
-  height: calc(var(--lh) * 2);
-  margin-left: calc(var(--lw) * -8 / 3);
+  width: calc(var(--lw) * 2);
+  height: calc(var(--lh) * 0.75);
+  margin-left: calc(var(--lw) * -1);
   transform-origin: 50% 0;
-  transform: translateZ(var(--floor-z)) scale(3);
+  transform: translateZ(var(--floor-z)) scale(8);
   /* The soft shadow sits under the desk: its centre is 2.4 laptop-depths from
      the wall (the gap plus half the desk), 40% of the floor's depth. */
   background:
@@ -659,40 +740,123 @@ const replicaStyle = computed(() => ({
 
 .skirting {
   position: absolute;
-  top: calc(var(--wall-y) - var(--lh) * 0.22 / 3);
+  top: calc(var(--wall-y) - var(--lh) * 0.22 / 8);
   left: 50%;
-  width: calc(var(--lw) * 16 / 3);
-  height: calc(var(--lh) * 0.22 / 3);
-  margin-left: calc(var(--lw) * -8 / 3);
+  width: calc(var(--lw) * 2);
+  height: calc(var(--lh) * 0.22 / 8);
+  margin-left: calc(var(--lw) * -1);
   transform-origin: 50% 100%;
   /* Raised a hair off the floor, for the same reason as the desk legs. */
-  transform: translateZ(calc(var(--floor-z) + 1px)) rotateX(-90deg) scale(3);
-  background: linear-gradient(180deg, #faf9f6, #ece9e3);
-  box-shadow: 0 1px 0 rgb(0 0 0 / 0.08);
+  transform: translateZ(calc(var(--floor-z) + 1px)) rotateX(-90deg) scale(8);
+  background: linear-gradient(180deg, #faf9f6, #e6e2db);
 }
 
-.desk-top,
-.desk-edge {
+/* Laid out at half size and scaled up around its centre: on a phone at 3x
+   density the full-size wood alone was a large share of graphics memory. */
+.desk-top {
   position: absolute;
-  top: calc(var(--desk-front) - var(--desk-d));
+  top: calc(var(--desk-front) - var(--desk-d) * 0.75);
+  left: 50%;
+  width: calc(var(--desk-w) / 2);
+  height: calc(var(--desk-d) / 2);
+  margin-left: calc(var(--desk-w) / -4);
+  border-radius: calc(var(--lw) * 0.004);
+  transform: translateZ(var(--desk-z)) scale(2);
+  /* The first layer is the mug's shadow, present only with the mug. */
+  background:
+    var(--mug-shadow, linear-gradient(transparent, transparent)),
+    radial-gradient(ellipse 60% 70% at 60% 55%, rgb(255 246 230 / 0.22), transparent 70%),
+    url('/wood.jpg') 0 0 / calc(var(--lw) * 1.15) auto repeat;
+  box-shadow: inset 0 0 0 0.5px rgb(255 240 215 / 0.35);
+}
+
+/* Mug */
+
+/* A round mug from three flat pieces. The body is an upright plane through the
+   mug's centre, so its outline meets the rim disc at its widest points from
+   any angle. The rim disc covers the body's top; the base disc, seen in front
+   of the body's foot, gives the bottom its curve. The body stops half a pixel
+   short of each disc so no two planes touch. */
+.mug-body {
+  position: absolute;
+  top: calc(var(--mug-y) - var(--mug-h) + 2px);
+  left: calc(var(--mug-x) - var(--mug-r));
+  width: calc(var(--mug-r) * 2.8);
+  height: calc(var(--mug-h) - 2px);
+  transform-origin: 50% 100%;
+  transform: translateZ(calc(var(--desk-z) + 1.5px)) rotateX(-90deg);
+}
+
+/* Terracotta glaze, lit from the upper right. */
+.mug-cup,
+.mug-base {
+  --glaze: linear-gradient(90deg, #7f3920 0%, #9a462a 12%, #b85634 34%, #cf6f49 58%, #dc8661 72%, #c1603b 88%, #8f4127 100%);
+}
+
+.mug-cup {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--mug-r) * 2);
+  height: 100%;
+  background: linear-gradient(180deg, transparent 70%, rgb(60 20 5 / 0.2)), var(--glaze);
+}
+
+.mug-base {
+  position: absolute;
+  top: calc(var(--mug-y) - var(--mug-r));
+  left: calc(var(--mug-x) - var(--mug-r));
+  width: calc(var(--mug-r) * 2);
+  height: calc(var(--mug-r) * 2);
+  border-radius: 50%;
+  transform: translateZ(calc(var(--desk-z) + 1px));
+  background: linear-gradient(rgb(60 20 5 / 0.2), rgb(60 20 5 / 0.2)), var(--glaze);
+}
+
+.mug-handle {
+  position: absolute;
+  top: 17%;
+  left: calc(var(--mug-r) * 1.82);
+  width: calc(var(--mug-r) * 0.8);
+  height: 50%;
+  border: calc(var(--mug-r) * 0.17) solid #b55530;
+  border-left-color: transparent;
+  border-radius: 0 50% 50% 0 / 0 50% 50% 0;
+}
+
+/* The rim and the coffee, seen from above: cream inside, terracotta outside. */
+.mug-top {
+  position: absolute;
+  top: calc(var(--mug-y) - var(--mug-r));
+  left: calc(var(--mug-x) - var(--mug-r));
+  width: calc(var(--mug-r) * 2);
+  height: calc(var(--mug-r) * 2);
+  border-radius: 50%;
+  transform: translateZ(calc(var(--desk-z) + var(--mug-h)));
+  /* Top to bottom: the rim's shadow on the coffee (light comes from the upper
+     right), a thin glazed rim that is clear in the middle, and the latte, which
+     fills the cup. public/latte-art.svg is drawn for this site, not a photo. */
+  background:
+    radial-gradient(circle at 62% 38%, transparent 52%, rgb(45 20 6 / 0.35) 60%, transparent 61%),
+    radial-gradient(closest-side, transparent 85%, rgb(50 22 8 / 0.7) 87%, #8e3e20 88.5%, #b9572f 91%, #d98159 94.5%, #c8673f 97%, #9c4628 100%),
+    url('/latte-art.svg') center / 90% 90% no-repeat;
+}
+
+/* The desk's thickness: one face along the front edge. It stands half a pixel
+   in front of the top's edge and rises half a pixel above its surface, so the
+   two planes never touch but overlap on screen from every camera angle. Any
+   gap between them, however thin, shows the back legs through it.
+   The sides and back never face the camera, which stays centred on the desk. */
+.desk-front {
+  position: absolute;
+  top: calc(var(--desk-front) + 0.5px);
   left: 50%;
   width: var(--desk-w);
-  height: var(--desk-d);
+  height: var(--desk-t);
   margin-left: calc(var(--desk-w) / -2);
-  border-radius: calc(var(--lw) * 0.03);
-}
-
-.desk-top {
-  transform: translateZ(var(--desk-z));
-  background:
-    radial-gradient(ellipse 60% 70% at 60% 55%, rgb(255 246 230 / 0.22), transparent 70%),
-    url('/wood.jpg') 0 0 / calc(var(--lw) * 2.3) auto repeat;
-  box-shadow: inset 0 0 0 1px rgb(255 240 215 / 0.35);
-}
-
-/* One slice of the desk's edge. */
-.desk-edge {
-  border: calc(var(--lw) * 0.03) solid;
+  transform-origin: 50% 0;
+  transform: translateZ(calc(var(--desk-z) + 0.5px)) rotateX(-90deg);
+  background: linear-gradient(180deg, #e6c08e 0%, #d3a46a 14%, #bf8d55 55%, #9c6d3e 100%);
 }
 
 /* Slim black steel legs at the corners, hanging from the underside of the top.
@@ -896,6 +1060,7 @@ const replicaStyle = computed(() => ({
   border-radius: calc(var(--lw) * 0.006);
   background-color: #ffffff;
   transform-origin: 50% 50%;
+  will-change: transform;
   pointer-events: none;
 }
 
@@ -912,7 +1077,9 @@ const replicaStyle = computed(() => ({
 
 .cta {
   position: absolute;
-  bottom: max(6vh, 1.5rem);
+  /* Measured from the bottom of the small viewport, so the button stays clear
+     of a phone's toolbar while the stage itself is 100lvh tall. */
+  bottom: calc(100lvh - 100svh + max(6svh, 1.5rem));
   left: 0;
   right: 0;
   z-index: 2;
