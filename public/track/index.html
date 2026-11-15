@@ -7,7 +7,7 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src https://api.github.com; img-src data:; base-uri 'none'; form-action 'none'">
 <title>Track</title>
-<!-- track-shell-v1 build-2 -->
+<!-- track-shell-v1 build-3 -->
 <!--
   This page holds no personal content. The plan and the progress live in a
   private GitHub repository and are loaded with a token that stays in this
@@ -558,7 +558,7 @@ details[open] > summary::before { content: "\2212"; }
     plan.weekly.forEach(function (h) {
       var arr = toArr(wd[h.id], h.count), tasks = (detail && detail[h.id]) || [], rows = '';
       for (var i = 0; i < h.count; i++) {
-        var task = tasks[i], on = !!arr[i];
+        var task = tasks[i] || h.task, on = !!arr[i];
         var title = task ? (typeof task === 'string' ? task : task.t) : 'Session ' + (i + 1);
         var more = task && typeof task !== 'string' && task.d ? task.d : '';
         rows += '<button type="button" class="check task' + (on ? ' on' : '') + '" data-act="tick" data-id="' + esc(h.id) + '" data-i="' + i +
@@ -636,7 +636,7 @@ details[open] > summary::before { content: "\2212"; }
 
     /* route */
     html += '<section class="card"><h2>Route</h2>' + (plan.destination ? '<p class="dest">' + esc(plan.destination) + '</p>' : '');
-    plan.phases.forEach(function (p) {
+    (plan.phases.length > 1 ? plan.phases : []).forEach(function (p) {
       var isNow = p === phase;
       html += '<details><summary><span class="ph-t">' + esc(p.title) + (isNow ? ' <span class="ph-m now-tag">now</span>' : '') + '</span>' +
         '<span class="ph-m">' + esc(p.months) + '</span><span class="ph-c">' + doneCount(p.milestones) + '/' + p.milestones.length + '</span></summary>' +
@@ -644,6 +644,10 @@ details[open] > summary::before { content: "\2212"; }
         (p.proof ? '<p class="proof"><span>Done when</span>' + esc(p.proof) + '</p>' : '') +
         '</details>';
     });
+    if (plan.later && plan.later.length) {
+      html += '<h3>After week ' + tw + '</h3><p class="sub">Possible directions. Chosen at the review, not before.</p><ul class="rules">' +
+        plan.later.map(function (l) { return '<li><strong>' + esc(l.t) + '.</strong> ' + esc(l.d || '') + '</li>'; }).join('') + '</ul>';
+    }
     html += '</section>';
 
     /* footer */
