@@ -7,7 +7,7 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src https://api.github.com; img-src data:; base-uri 'none'; form-action 'none'">
 <title>Track</title>
-<!-- track-shell-v1 -->
+<!-- track-shell-v1 build-2 -->
 <!--
   This page holds no personal content. The plan and the progress live in a
   private GitHub repository and are loaded with a token that stays in this
@@ -113,21 +113,19 @@ h3 { font-size: 0.95rem; margin-top: 18px; }
 .score b { font-size: 1.7rem; color: var(--ink); margin-right: 4px; }
 .meter { height: 6px; background: var(--line); border-radius: 3px; margin: 8px 0 6px; overflow: hidden; }
 .meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
-.habit {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 8px 12px;
-  padding: 12px 0; border-top: 1px solid var(--line);
+.focus { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.focus-t { font-size: 1.05rem; font-weight: 600; line-height: 1.3; }
+.habit-h {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
 }
-.habit:first-of-type { margin-top: 8px; }
-.habit:last-child { padding-bottom: 0; }
-.boxes { display: flex; gap: 8px; }
-.box {
-  width: 44px; height: 44px; padding: 0;
-  border: 2px solid var(--line); border-radius: 10px;
-  background: transparent; cursor: pointer; position: relative;
-}
-.box.on { background: var(--accent); border-color: var(--accent); }
-.box.on::after, .check.on .tickbox::after {
+.habit-h h3 { margin: 0; }
+.task .check-t strong { display: block; font-weight: 600; }
+.task-d { display: block; margin-top: 2px; color: var(--muted); font-size: 0.9rem; }
+.check.task.on .check-t { text-decoration: none; }
+.check.task.on .check-t strong { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.note { margin-top: 12px; }
+.check.on .tickbox::after {
   content: ""; position: absolute; left: 50%; top: 46%;
   width: 28%; height: 52%;
   border: solid var(--on-accent); border-width: 0 3px 3px 0;
@@ -206,7 +204,7 @@ details[open] > summary::before { content: "\2212"; }
 .backup { margin-top: 8px; font: 0.75rem/1.4 var(--mono); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) {
-  .box, .tickbox { transition: background-color 0.15s, border-color 0.15s; }
+  .tickbox { transition: background-color 0.15s, border-color 0.15s; }
   .meter i { transition: width 0.25s; }
 }
 </style>
@@ -267,13 +265,29 @@ details[open] > summary::before { content: "\2212"; }
     };
   }
 
+  /* a habit's sessions for one week: an array of 0/1. Older data stored a plain count. */
+  function toArr(v, n) {
+    var out = [];
+    for (var i = 0; i < n; i++) { out.push(Array.isArray(v) ? (v[i] ? 1 : 0) : (i < (v || 0) ? 1 : 0)); }
+    return out;
+  }
+  function doneIn(wd, h) {
+    return toArr(wd[h.id], h.count).reduce(function (a, b) { return a + b; }, 0);
+  }
+
   function applyOps(b, ops) {
     var s = JSON.parse(JSON.stringify(normalize(b)));
     ops.forEach(function (o) {
       var w;
       if (o.t === 'tick') {
         w = s.weeks[o.w] || (s.weeks[o.w] = {});
-        w[o.id] = o.v;
+        if (o.i === undefined) {
+          w[o.id] = o.v;
+        } else {
+          var arr = toArr(w[o.id], o.n);
+          arr[o.i] = o.v ? 1 : 0;
+          w[o.id] = arr;
+        }
       } else if (o.t === 'note') {
         w = s.weeks[o.w] || (s.weeks[o.w] = {});
         w.note = w.note || {};
@@ -292,7 +306,7 @@ details[open] > summary::before { content: "\2212"; }
   }
 
   function opKey(o) {
-    if (o.t === 'tick') { return 'tick|' + o.w + '|' + o.id; }
+    if (o.t === 'tick') { return 'tick|' + o.w + '|' + o.id + '|' + (o.i === undefined ? '' : o.i); }
     if (o.t === 'note') { return 'note|' + o.w + '|' + o.f; }
     if (o.t === 'done') { return 'done|' + o.id; }
     return '';
@@ -524,7 +538,8 @@ details[open] > summary::before { content: "\2212"; }
     var wd = state.weeks[String(w)] || {};
     var note = wd.note || {};
     var total = plan.weekly.reduce(function (a, h) { return a + h.count; }, 0);
-    var score = plan.weekly.reduce(function (a, h) { return a + Math.min(h.count, wd[h.id] || 0); }, 0);
+    var score = plan.weekly.reduce(function (a, h) { return a + doneIn(wd, h); }, 0);
+    var detail = (plan.weeks || {})[String(w)] || null;
     var phase = phaseFor(cw);
     var html = '';
 
@@ -537,16 +552,23 @@ details[open] > summary::before { content: "\2212"; }
       '<div class="wk-title"><h2>Week ' + w + ' <span class="of">of ' + tw + '</span></h2><p class="sub">' + esc(weekRange(w) + when) + '</p></div>' +
       '<button type="button" class="nav" data-act="next" aria-label="Next week"' + (w >= cw ? ' disabled' : '') + '>&#8250;</button></div>' +
       '<p class="score"><b>' + score + '</b>of ' + total + ' sessions</p>' +
-      '<div class="meter"><i style="width:' + Math.round(score / total * 100) + '%"></i></div>';
+      '<div class="meter"><i style="width:' + Math.round(score / total * 100) + '%"></i></div>' +
+      (detail && detail.focus ? '<div class="focus"><p class="eyebrow">Focus</p><p class="focus-t">' + esc(detail.focus) + '</p>' +
+        (detail.outcome ? '<p class="sub">By Sunday: ' + esc(detail.outcome) + '</p>' : '') + '</div>' : '');
     plan.weekly.forEach(function (h) {
-      var v = Math.min(h.count, wd[h.id] || 0), boxes = '';
+      var arr = toArr(wd[h.id], h.count), tasks = (detail && detail[h.id]) || [], rows = '';
       for (var i = 0; i < h.count; i++) {
-        var on = i < v;
-        boxes += '<button type="button" class="box' + (on ? ' on' : '') + '" data-act="tick" data-id="' + esc(h.id) + '" data-on="' + (on ? 1 : 0) +
-          '" aria-pressed="' + on + '" aria-label="' + esc(h.label) + ', ' + (i + 1) + ' of ' + h.count + '"></button>';
+        var task = tasks[i], on = !!arr[i];
+        var title = task ? (typeof task === 'string' ? task : task.t) : 'Session ' + (i + 1);
+        var more = task && typeof task !== 'string' && task.d ? task.d : '';
+        rows += '<button type="button" class="check task' + (on ? ' on' : '') + '" data-act="tick" data-id="' + esc(h.id) + '" data-i="' + i +
+          '" data-n="' + h.count + '" data-on="' + (on ? 1 : 0) + '" aria-pressed="' + on + '"><span class="tickbox"></span>' +
+          '<span class="check-t"><strong>' + esc(title) + '</strong>' + (more ? '<span class="task-d">' + esc(more) + '</span>' : '') + '</span></button>';
       }
-      html += '<div class="habit"><span>' + esc(h.label) + '</span><span class="boxes">' + boxes + '</span></div>';
+      html += '<div class="habit-h"><h3>' + esc(h.label) + '</h3><span class="ph-c">' + doneIn(wd, h) + '/' + h.count + '</span></div>' +
+        (h.how ? '<p class="sub">' + esc(h.how) + '</p>' : '') + '<div class="list">' + rows + '</div>';
     });
+    if (!detail) { html += '<p class="sub note">The tasks for these weeks are written at the phase review.</p>'; }
     html += '</section>';
 
     /* weekly review */
@@ -575,6 +597,7 @@ details[open] > summary::before { content: "\2212"; }
     var pd = doneCount(phase.milestones);
     html += '<section class="card"><p class="eyebrow">Current heading</p><h2>' + esc(phase.title) + '</h2>' +
       '<p class="sub">' + esc(phase.months) + ' · weeks ' + phase.startWeek + ' to ' + phase.endWeek + '</p>' +
+      (phase.summary ? '<p class="dest">' + esc(phase.summary) + '</p>' : '') +
       '<p class="score"><b>' + pd + '</b>of ' + phase.milestones.length + ' milestones</p>' +
       '<div class="meter"><i style="width:' + Math.round(pd / phase.milestones.length * 100) + '%"></i></div>' +
       '<div class="list">' + phase.milestones.map(checkRow).join('') + '</div>' +
@@ -582,7 +605,7 @@ details[open] > summary::before { content: "\2212"; }
       '<div class="strip">';
     for (var k = phase.startWeek; k <= phase.endWeek; k++) {
       var kd = state.weeks[String(k)] || {};
-      var ks = plan.weekly.reduce(function (a, h) { return a + Math.min(h.count, kd[h.id] || 0); }, 0);
+      var ks = plan.weekly.reduce(function (a, h) { return a + doneIn(kd, h); }, 0);
       var fut = k > cw;
       html += '<button type="button" class="cell' + (fut ? ' future' : '') + (k === cw ? ' now' : '') + '" style="--r:' + (ks / total).toFixed(2) + '"' +
         (fut ? ' disabled' : ' data-act="goto" data-w="' + k + '"') + ' aria-label="Week ' + k + ', ' + ks + ' of ' + total + ' sessions" title="Week ' + k + ': ' + ks + ' of ' + total + '"></button>';
@@ -650,9 +673,7 @@ details[open] > summary::before { content: "\2212"; }
     footMsg = '';
 
     if (act === 'tick') {
-      var w = activeWeek();
-      var cur = (state.weeks[w] || {})[el.dataset.id] || 0;
-      push({ t: 'tick', w: w, id: el.dataset.id, v: el.dataset.on === '1' ? Math.max(cur - 1, 0) : cur + 1 });
+      push({ t: 'tick', w: activeWeek(), id: el.dataset.id, i: +el.dataset.i, n: +el.dataset.n, v: el.dataset.on === '1' ? 0 : 1 });
       render();
     } else if (act === 'done') {
       push({ t: 'done', id: el.dataset.id, v: !state.done[el.dataset.id], d: todayISO() });
